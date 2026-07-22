@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Movie } from '../types';
@@ -128,4 +128,5 @@ export const Hero: React.FC<HeroProps> = ({ movies, onPlay, onInfo }) => {
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
 }
+
 

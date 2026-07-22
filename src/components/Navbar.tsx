@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, User, Menu, X, Home, Film, Tv, TrendingUp, List, SlidersHorizontal, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -64,12 +64,12 @@ export const Navbar: React.FC<NavbarProps> = ({
       )}
     >
       <div className="flex items-center gap-6 md:gap-8">
-        <h1 
+        <div 
           className="text-red-600 text-2xl md:text-3xl font-black tracking-tighter cursor-pointer flex items-center gap-1 select-none hover:opacity-90 transition-opacity"
           onClick={() => setActiveTab('home')}
         >
           CINESTREAM
-        </h1>
+        </div>
         
         <div className="hidden lg:flex items-center gap-6">
           {navItems.map((item) => (
@@ -246,4 +246,5 @@ export const Navbar: React.FC<NavbarProps> = ({
     </nav>
   );
 };
+
 

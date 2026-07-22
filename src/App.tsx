@@ -539,7 +539,7 @@ function CineStreamApp() {
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-zinc-900/60 text-xs">
-          <p>Â© 2026 CineStream Inc. All rights reserved.</p>
+          <p>© 2026 CineStream Inc. All rights reserved.</p>
           <div className="flex gap-6">
             <button className="hover:text-white transition-colors">Twitter</button>
             <button className="hover:text-white transition-colors">Instagram</button>
@@ -558,6 +558,7 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
 
 
 
