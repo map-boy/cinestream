@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { MovieRow } from './components/MovieRow';
@@ -15,11 +15,13 @@ import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User } from 'f
 import { doc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion } from 'firebase/firestore';
 import { AnimatePresence, motion } from 'motion/react';
 import { FilterPanel } from './components/FilterPanel';
+import { Blog } from './components/Blog';
 
 function CineStreamApp() {
   const [activeTab, setActiveTab] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [isBlogOpen, setIsBlogOpen] = useState(false);
   
   // Filter state
   const [filters, setFilters] = useState<MovieFilters>({
@@ -500,6 +502,8 @@ function CineStreamApp() {
         )}
       </AnimatePresence>
 
+      {isBlogOpen && <Blog onClose={() => setIsBlogOpen(false)} />}
+
       {/* Footer */}
       <footer className="border-t border-zinc-900 py-12 px-4 md:px-12 text-zinc-500 text-sm bg-zinc-950">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
@@ -513,6 +517,7 @@ function CineStreamApp() {
             <button onClick={() => setActiveTab('movies')} className="text-left text-xs hover:text-white transition-colors">Movies Catalog</button>
             <button onClick={() => setActiveTab('tv')} className="text-left text-xs hover:text-white transition-colors">TV Shows</button>
             <button onClick={() => setActiveTab('trending')} className="text-left text-xs hover:text-white transition-colors">Trending Now</button>
+            <button onClick={() => setIsBlogOpen(true)} className="text-left text-xs hover:text-white transition-colors">Blog</button>
           </div>
           <div className="space-y-2 flex flex-col">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Support</h4>
@@ -534,7 +539,7 @@ function CineStreamApp() {
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-zinc-900/60 text-xs">
-          <p>© 2026 CineStream Inc. All rights reserved.</p>
+          <p>Â© 2026 CineStream Inc. All rights reserved.</p>
           <div className="flex gap-6">
             <button className="hover:text-white transition-colors">Twitter</button>
             <button className="hover:text-white transition-colors">Instagram</button>
@@ -553,6 +558,9 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
+
+
 
 
 
