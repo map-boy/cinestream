@@ -1,4 +1,5 @@
-﻿import { Movie } from '../types';
+import { Movie } from '../types';
+import { findArchiveMatch, getArchiveEmbedUrl } from '../data/publicDomainMovies';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY as string;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -186,7 +187,35 @@ async function getRelatedMovies(movie: Movie): Promise<Movie[]> {
   return (data.results || []).map((r: any) => mapItem(r, movie.type || 'movie'));
 }
 
+async function getTrailerKey(id: string, type: string = 'movie'): Promise<string | null> {
+  const path = type === 'tv' ? `/tv/${id}/videos` : `/movie/${id}/videos`;
+  const res = await fetch(`${BASE_URL}${path}?api_key=${API_KEY}`);
+  const data = await res.json();
+  const trailer = (data.results || []).find(
+    (v: any) => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser')
+  );
+  return trailer ? trailer.key : null;
+}
+
+
+async function attachPublicDomainFlags(movies: Movie[]): Promise<Movie[]> {
+  const results = await Promise.all(
+    movies.map(async (m) => {
+      const identifier = await findArchiveMatch(m.title, m.year);
+      if (identifier) {
+        return {
+          ...m,
+          isPlayableFull: true,
+          videoUrl: getArchiveEmbedUrl(identifier),
+        };
+      }
+      return m;
+    })
+  );
+  return results;
+}
 export const movieService = {
+  attachPublicDomainFlags,
   getAllMovies,
   getMoviesOnly,
   getTvShows,
@@ -198,4 +227,7 @@ export const movieService = {
   getAvailableYears,
   searchMovies,
   getRelatedMovies,
+  getTrailerKey,
 };
+
+

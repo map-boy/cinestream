@@ -9,6 +9,8 @@ export interface Movie {
   thumbnail: string;
   backdrop: string;
   videoUrl: string;
+  trailerKey?: string;
+  isPlayableFull?: boolean;
   isTrending?: boolean;
   isPopular?: boolean;
   isLatest?: boolean;
@@ -36,4 +38,5 @@ export interface UserProfile {
     progress: number; // 0 to 100
   }[];
 }
+
 
