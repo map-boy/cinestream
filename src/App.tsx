@@ -16,6 +16,7 @@ import { doc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion } from 'firebase
 import { AnimatePresence, motion } from 'motion/react';
 import { FilterPanel } from './components/FilterPanel';
 import { Blog } from './components/Blog';
+import { AdSlot } from './components/AdSlot';
 
 function CineStreamApp() {
   const [activeTab, setActiveTab] = useState('home');
@@ -348,6 +349,9 @@ function CineStreamApp() {
                   onPlay={setPlayingMovie}
                   onInfo={setSelectedMovie}
                 />
+                <div className="px-4 md:px-12">
+                  <AdSlot slot="2222222222" />
+                </div>
                 <MovieRow
                   title="Action Thrillers"
                   movies={actionMovies}
@@ -360,6 +364,9 @@ function CineStreamApp() {
                   onPlay={setPlayingMovie}
                   onInfo={setSelectedMovie}
                 />
+                <div className="px-4 md:px-12">
+                  <AdSlot slot="1111111111" />
+                </div>
               </div>
             </motion.div>
           )}
@@ -558,6 +565,9 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
+
+
 
 
 
