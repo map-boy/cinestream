@@ -64,6 +64,7 @@ export const Hero: React.FC<HeroProps> = ({ movies, onPlay, onInfo }) => {
             </span>
           </div>
           
+          <h1 className="sr-only">CineStream - Watch Movies and TV Shows Online</h1>
           <h2 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-3 md:mb-4 leading-tight tracking-tight">
             {movie.title}
           </h2>
@@ -127,3 +128,4 @@ export const Hero: React.FC<HeroProps> = ({ movies, onPlay, onInfo }) => {
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
 }
+

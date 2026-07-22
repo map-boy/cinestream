@@ -214,7 +214,43 @@ async function attachPublicDomainFlags(movies: Movie[]): Promise<Movie[]> {
   );
   return results;
 }
+
+export interface MovieReview {
+  author: string;
+  content: string;
+  rating?: number;
+}
+
+export interface CastMember {
+  name: string;
+  character: string;
+  profilePath: string | null;
+}
+
+async function getMovieReviews(id: string, type: string = 'movie'): Promise<MovieReview[]> {
+  const path = type === 'tv' ? `/tv/${id}/reviews` : `/movie/${id}/reviews`;
+  const res = await fetch(`${BASE_URL}${path}?api_key=${API_KEY}`);
+  const data = await res.json();
+  return (data.results || []).slice(0, 5).map((r: any) => ({
+    author: r.author,
+    content: r.content,
+    rating: r.author_details?.rating,
+  }));
+}
+
+async function getMovieCredits(id: string, type: string = 'movie'): Promise<CastMember[]> {
+  const path = type === 'tv' ? `/tv/${id}/credits` : `/movie/${id}/credits`;
+  const res = await fetch(`${BASE_URL}${path}?api_key=${API_KEY}`);
+  const data = await res.json();
+  return (data.cast || []).slice(0, 10).map((c: any) => ({
+    name: c.name,
+    character: c.character,
+    profilePath: c.profile_path ? `${IMG_BASE}/w185${c.profile_path}` : null,
+  }));
+}
 export const movieService = {
+  getMovieReviews,
+  getMovieCredits,
   attachPublicDomainFlags,
   getAllMovies,
   getMoviesOnly,
@@ -229,5 +265,6 @@ export const movieService = {
   getRelatedMovies,
   getTrailerKey,
 };
+
 
 

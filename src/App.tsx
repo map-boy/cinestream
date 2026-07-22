@@ -516,9 +516,10 @@ function CineStreamApp() {
           </div>
           <div className="space-y-2 flex flex-col">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Support</h4>
-            <button className="text-left text-xs hover:text-white transition-colors">Help Center</button>
-            <button className="text-left text-xs hover:text-white transition-colors">Terms of Service</button>
-            <button className="text-left text-xs hover:text-white transition-colors">Privacy Policy</button>
+            <a href="/contact.html" className="text-left text-xs hover:text-white transition-colors">Contact Us</a>
+            <a href="/about.html" className="text-left text-xs hover:text-white transition-colors">About Us</a>
+            <a href="/terms.html" className="text-left text-xs hover:text-white transition-colors">Terms of Service</a>
+            <a href="/privacy.html" className="text-left text-xs hover:text-white transition-colors">Privacy Policy</a>
           </div>
           <div className="space-y-4">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs">Newsletter</h4>
@@ -552,5 +553,6 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
 
 

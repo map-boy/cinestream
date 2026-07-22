@@ -1,8 +1,10 @@
-import React from 'react';
-import { Play, Plus, X, Star, Clock, Calendar, Tag } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+﻿import React, { useState, useEffect } from 'react';
+import { Play, Plus, X, Star, Clock, Calendar, Tag, ExternalLink, Users } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Movie } from '../types';
 import { MovieRow } from './MovieRow';
+import { movieService, MovieReview, CastMember } from '../services/movieService';
+import { getWikipediaSummary, WikiSummary } from '../data/wikipediaService';
 
 interface MovieDetailProps {
   movie: Movie | null;
@@ -13,14 +15,44 @@ interface MovieDetailProps {
   relatedMovies: Movie[];
 }
 
-export const MovieDetail: React.FC<MovieDetailProps> = ({ 
-  movie, 
-  onClose, 
-  onPlay, 
-  onAddToList, 
+export const MovieDetail: React.FC<MovieDetailProps> = ({
+  movie,
+  onClose,
+  onPlay,
+  onAddToList,
   onSelectMovie,
-  relatedMovies 
+  relatedMovies
 }) => {
+  const [wikiSummary, setWikiSummary] = useState<WikiSummary | null>(null);
+  const [reviews, setReviews] = useState<MovieReview[]>([]);
+  const [cast, setCast] = useState<CastMember[]>([]);
+  const [contentLoading, setContentLoading] = useState(true);
+
+  useEffect(() => {
+    if (!movie) return;
+    let cancelled = false;
+    setContentLoading(true);
+    setWikiSummary(null);
+    setReviews([]);
+    setCast([]);
+
+    Promise.all([
+      getWikipediaSummary(movie.title, movie.year),
+      movieService.getMovieReviews(movie.id, movie.type || 'movie'),
+      movieService.getMovieCredits(movie.id, movie.type || 'movie'),
+    ]).then(([wiki, revs, credits]) => {
+      if (cancelled) return;
+      setWikiSummary(wiki);
+      setReviews(revs);
+      setCast(credits);
+      setContentLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [movie?.id]);
+
   if (!movie) return null;
 
   return (
@@ -49,12 +81,12 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
-          
+
           <div className="absolute bottom-6 md:bottom-12 left-4 md:left-16 right-4 max-w-2xl">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-4 sm:mb-6 tracking-tighter">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-4 sm:mb-6 tracking-tighter">
               {movie.title}
-            </h1>
-            
+            </h2>
+
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-2">
               <button
                 onClick={() => onPlay(movie)}
@@ -97,6 +129,75 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
                 {movie.description}
               </p>
             </div>
+
+            {wikiSummary && (
+              <div className="space-y-3 border-t border-zinc-900 pt-6">
+                <h3 className="text-lg md:text-xl font-bold text-white">About {movie.title}</h3>
+                <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                  {wikiSummary.extract}
+                </p>
+                <a
+                  href={wikiSummary.pageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  Source: Wikipedia <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            )}
+
+            {cast.length > 0 && (
+              <div className="space-y-3 border-t border-zinc-900 pt-6">
+                <h3 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
+                  <Users className="w-5 h-5 text-red-600" />
+                  Top Cast
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                  {cast.map((c, i) => (
+                    <div key={i} className="text-center">
+                      <div className="w-full aspect-square rounded-full overflow-hidden bg-zinc-900 mb-1.5 border border-zinc-800">
+                        {c.profilePath ? (
+                          <img
+                            src={c.profilePath}
+                            alt={c.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-zinc-700">
+                            <Users className="w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold text-white truncate">{c.name}</p>
+                      <p className="text-[10px] text-zinc-500 truncate">{c.character}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {reviews.length > 0 && (
+              <div className="space-y-4 border-t border-zinc-900 pt-6">
+                <h3 className="text-lg md:text-xl font-bold text-white">Viewer Reviews</h3>
+                {reviews.map((r, i) => (
+                  <div key={i} className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/60">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-white">{r.author}</span>
+                      {r.rating && (
+                        <span className="flex items-center gap-1 text-xs text-yellow-500">
+                          <Star className="w-3 h-3 fill-current" /> {r.rating}/10
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm text-gray-400 leading-relaxed line-clamp-4">
+                      {r.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-2">
               {movie.genre.map((g) => (
@@ -145,4 +246,3 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
     </motion.div>
   );
 };
-
