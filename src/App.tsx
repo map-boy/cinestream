@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { MovieRow } from './components/MovieRow';
@@ -16,15 +17,14 @@ import { doc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion } from 'firebase
 import { AnimatePresence, motion } from 'motion/react';
 import { FilterPanel } from './components/FilterPanel';
 import { Blog } from './components/Blog';
+import { BlogPost } from './components/BlogPost';
 import { AdSlot } from './components/AdSlot';
 
-function CineStreamApp() {
+function HomeContent() {
   const [activeTab, setActiveTab] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [isBlogOpen, setIsBlogOpen] = useState(false);
-  
-  // Filter state
+
   const [filters, setFilters] = useState<MovieFilters>({
     genres: [],
     minRating: 0,
@@ -33,7 +33,6 @@ function CineStreamApp() {
     sortBy: undefined,
   });
 
-  // Movie collections state
   const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [moviesOnly, setMoviesOnly] = useState<Movie[]>([]);
   const [tvShows, setTvShows] = useState<Movie[]>([]);
@@ -42,24 +41,20 @@ function CineStreamApp() {
   const [latestMovies, setLatestMovies] = useState<Movie[]>([]);
   const [actionMovies, setActionMovies] = useState<Movie[]>([]);
   const [dramaMovies, setDramaMovies] = useState<Movie[]>([]);
-  
-  // Search & Related state
+
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [relatedMovies, setRelatedMovies] = useState<Movie[]>([]);
 
-  // Selected & Playing
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [playingMovie, setPlayingMovie] = useState<Movie | null>(null);
 
-  // User Auth & Firestore profile
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
 
-  // Initial Data Fetching via movieService
   useEffect(() => {
     async function loadInitialData() {
       setIsAppLoading(true);
@@ -108,12 +103,10 @@ function CineStreamApp() {
     loadInitialData();
   }, []);
 
-  // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Sync user profile
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         if (!userDoc.exists()) {
           const newProfile: UserProfile = {
@@ -130,7 +123,6 @@ function CineStreamApp() {
           setUserProfile(userDoc.data() as UserProfile);
         }
 
-        // Real-time updates for user profile
         onSnapshot(doc(db, 'users', firebaseUser.uid), (snapshot) => {
           if (snapshot.exists()) {
             setUserProfile(snapshot.data() as UserProfile);
@@ -143,7 +135,6 @@ function CineStreamApp() {
     return () => unsubscribe();
   }, []);
 
-  // Search & Filter Execution
   const executeSearch = useCallback(async () => {
     const hasQuery = searchQuery.trim() !== '';
     const hasActiveFilters =
@@ -173,7 +164,6 @@ function CineStreamApp() {
     executeSearch();
   }, [executeSearch]);
 
-  // Load related movies whenever selectedMovie changes
   useEffect(() => {
     if (selectedMovie) {
       movieService.getRelatedMovies(selectedMovie).then(setRelatedMovies);
@@ -320,7 +310,7 @@ function CineStreamApp() {
                 onPlay={setPlayingMovie}
                 onInfo={setSelectedMovie}
               />
-              
+
               <div className="-mt-20 relative z-10">
                 {continueWatchingMovies.length > 0 && (
                   <MovieRow
@@ -460,7 +450,6 @@ function CineStreamApp() {
         </AnimatePresence>
       </main>
 
-      {/* Overlays */}
       <AnimatePresence>
         {isSearchOrFilterActive && (
           <SearchOverlay
@@ -509,14 +498,11 @@ function CineStreamApp() {
         )}
       </AnimatePresence>
 
-      {isBlogOpen && <Blog onClose={() => setIsBlogOpen(false)} />}
-
-      {/* Footer */}
       <footer className="border-t border-zinc-900 py-12 px-4 md:px-12 text-zinc-500 text-sm bg-zinc-950">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="space-y-4">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs">CineStream</h4>
-            <p className="text-xs leading-relaxed text-zinc-400">The premier streaming destination for high-definition cinema and exclusive originals.</p>
+            <p className="text-xs leading-relaxed text-zinc-400">Browse movies and TV shows, read reviews, and stream our library of public domain films.</p>
           </div>
           <div className="space-y-2 flex flex-col">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Navigation</h4>
@@ -524,7 +510,7 @@ function CineStreamApp() {
             <button onClick={() => setActiveTab('movies')} className="text-left text-xs hover:text-white transition-colors">Movies Catalog</button>
             <button onClick={() => setActiveTab('tv')} className="text-left text-xs hover:text-white transition-colors">TV Shows</button>
             <button onClick={() => setActiveTab('trending')} className="text-left text-xs hover:text-white transition-colors">Trending Now</button>
-            <button onClick={() => setIsBlogOpen(true)} className="text-left text-xs hover:text-white transition-colors">Blog</button>
+            <Link to="/blog" className="text-left text-xs hover:text-white transition-colors">Blog</Link>
           </div>
           <div className="space-y-2 flex flex-col">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Support</h4>
@@ -536,9 +522,9 @@ function CineStreamApp() {
           <div className="space-y-4">
             <h4 className="text-white font-bold uppercase tracking-widest text-xs">Newsletter</h4>
             <div className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="Email address" 
+              <input
+                type="email"
+                placeholder="Email address"
                 className="bg-zinc-900 border border-zinc-800 text-xs rounded px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-red-600 text-white"
               />
               <button className="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-red-700 transition-colors">Join</button>
@@ -546,7 +532,7 @@ function CineStreamApp() {
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-zinc-900/60 text-xs">
-          <p>© 2026 CineStream Inc. All rights reserved.</p>
+          <p>(c) 2026 CineStream Inc. All rights reserved.</p>
           <div className="flex gap-6">
             <button className="hover:text-white transition-colors">Twitter</button>
             <button className="hover:text-white transition-colors">Instagram</button>
@@ -558,6 +544,16 @@ function CineStreamApp() {
   );
 }
 
+function CineStreamApp() {
+  return (
+    <Routes>
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/*" element={<HomeContent />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -565,13 +561,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-
-
-
-
-
-
-
-
 
