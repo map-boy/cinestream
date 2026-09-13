@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -19,6 +19,8 @@ import { FilterPanel } from './components/FilterPanel';
 import { Blog } from './components/Blog';
 import { BlogPost } from './components/BlogPost';
 import { AdSlot } from './components/AdSlot';
+import { SiteFooter } from './components/SiteFooter';
+import { NotFound } from './components/NotFound';
 
 function HomeContent() {
   const [activeTab, setActiveTab] = useState('home');
@@ -54,10 +56,12 @@ function HomeContent() {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     async function loadInitialData() {
       setIsAppLoading(true);
+      setLoadFailed(false);
       try {
         const [
           all,
@@ -95,6 +99,7 @@ function HomeContent() {
         setAvailableYears(years);
       } catch (err) {
         console.error('Failed to load movie collections:', err);
+        setLoadFailed(true);
       } finally {
         setIsAppLoading(false);
       }
@@ -265,6 +270,10 @@ function HomeContent() {
   const isSearchOrFilterActive =
     searchQuery.trim() !== '' || isFilterPanelOpen || hasActiveFilters;
 
+  // TMDB unreachable or misconfigured: explain that instead of showing a page
+  // of empty carousels.
+  const catalogueUnavailable = loadFailed && allMovies.length === 0;
+
   if (isAppLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white">
@@ -305,14 +314,31 @@ function HomeContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Hero
-                movies={trendingMovies.slice(0, 5)}
-                onPlay={setPlayingMovie}
-                onInfo={setSelectedMovie}
-              />
+              {catalogueUnavailable ? (
+                <section className="pt-32 px-4 md:px-12 max-w-3xl mx-auto">
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-4">CineStream</h1>
+                  <p className="text-zinc-400 leading-relaxed mb-4">
+                    The film catalogue is temporarily unavailable because our metadata provider is
+                    not responding. This affects browsing only; the rest of the site is working
+                    normally. Please try again shortly.
+                  </p>
+                  <p className="text-zinc-400 leading-relaxed">
+                    In the meantime you can read our{' '}
+                    <Link to="/blog" className="text-red-500 hover:underline">guides and articles</Link>,
+                    or see the <a href="/faq.html" className="text-red-500 hover:underline">FAQ</a> for
+                    how the site works.
+                  </p>
+                </section>
+              ) : (
+                <Hero
+                  movies={trendingMovies.slice(0, 5)}
+                  onPlay={setPlayingMovie}
+                  onInfo={setSelectedMovie}
+                />
+              )}
 
-              <div className="-mt-20 relative z-10">
-                {continueWatchingMovies.length > 0 && (
+              <div className={catalogueUnavailable ? 'relative z-10' : '-mt-20 relative z-10'}>
+                {!catalogueUnavailable && continueWatchingMovies.length > 0 && (
                   <MovieRow
                     title="Continue Watching"
                     movies={continueWatchingMovies}
@@ -321,42 +347,82 @@ function HomeContent() {
                     movieProgress={movieProgressMap}
                   />
                 )}
-                <MovieRow
-                  title="Trending Now"
-                  movies={trendingMovies}
-                  onPlay={setPlayingMovie}
-                  onInfo={setSelectedMovie}
-                />
-                <MovieRow
-                  title="Popular Movies"
-                  movies={popularMovies}
-                  onPlay={setPlayingMovie}
-                  onInfo={setSelectedMovie}
-                />
-                <MovieRow
-                  title="Latest Releases"
-                  movies={latestMovies}
-                  onPlay={setPlayingMovie}
-                  onInfo={setSelectedMovie}
-                />
-                <div className="px-4 md:px-12">
-                  <AdSlot slot="2222222222" />
-                </div>
-                <MovieRow
-                  title="Action Thrillers"
-                  movies={actionMovies}
-                  onPlay={setPlayingMovie}
-                  onInfo={setSelectedMovie}
-                />
-                <MovieRow
-                  title="Powerful Dramas"
-                  movies={dramaMovies}
-                  onPlay={setPlayingMovie}
-                  onInfo={setSelectedMovie}
-                />
-                <div className="px-4 md:px-12">
-                  <AdSlot slot="1111111111" />
-                </div>
+                {!catalogueUnavailable && (
+                  <>
+                  <MovieRow
+                    title="Trending Now"
+                    movies={trendingMovies}
+                    onPlay={setPlayingMovie}
+                    onInfo={setSelectedMovie}
+                  />
+                  <MovieRow
+                    title="Popular Movies"
+                    movies={popularMovies}
+                    onPlay={setPlayingMovie}
+                    onInfo={setSelectedMovie}
+                  />
+                  <MovieRow
+                    title="Latest Releases"
+                    movies={latestMovies}
+                    onPlay={setPlayingMovie}
+                    onInfo={setSelectedMovie}
+                  />
+                  <div className="px-4 md:px-12">
+                    <AdSlot slot="2222222222" />
+                  </div>
+                  <MovieRow
+                    title="Action Thrillers"
+                    movies={actionMovies}
+                    onPlay={setPlayingMovie}
+                    onInfo={setSelectedMovie}
+                  />
+                  <MovieRow
+                    title="Powerful Dramas"
+                    movies={dramaMovies}
+                    onPlay={setPlayingMovie}
+                    onInfo={setSelectedMovie}
+                  />
+                  <div className="px-4 md:px-12">
+                    <AdSlot slot="1111111111" />
+                  </div>
+                  </>
+                )}
+
+                <section className="px-4 md:px-12 mt-12">
+                  <div className="max-w-3xl space-y-4 text-sm leading-relaxed text-zinc-400">
+                    <h2 className="text-2xl font-black text-white tracking-tight">About CineStream</h2>
+                    <p>
+                      CineStream is a film and television discovery platform built by VAF Ubwenge
+                      Tech in Kigali, Rwanda. Every title carries a full synopsis, cast and crew
+                      credits, a rating shown alongside its vote count, and written reviews, so you
+                      can judge whether something is worth your evening before you start it rather
+                      than afterwards.
+                    </p>
+                    <p>
+                      Alongside that catalogue we maintain a library of public domain films you can
+                      watch here in full: silent-era classics, mid-century film noir, early science
+                      fiction, and archival documentaries whose copyright has expired or was never
+                      renewed. Those are the only titles on which we offer complete playback. For
+                      films still under copyright we show information and an official trailer only.
+                      CineStream does not host, mirror or distribute copyrighted films, and does not
+                      link to sites that do.
+                    </p>
+                    <p>
+                      New to the site? The{' '}
+                      <Link to="/blog/guide-using-cinestream" className="text-red-500 hover:underline">
+                        quick guide
+                      </Link>{' '}
+                      explains how the rows, filters and saved lists work. Our{' '}
+                      <Link to="/blog" className="text-red-500 hover:underline">blog</Link> covers how
+                      trending titles are ranked, what public domain actually means, and how films
+                      from earlier eras were made. The{' '}
+                      <a href="/faq.html" className="text-red-500 hover:underline">FAQ</a> answers the
+                      most common questions, and our{' '}
+                      <a href="/disclaimer.html" className="text-red-500 hover:underline">disclaimer</a>{' '}
+                      sets out exactly where every video on the site comes from.
+                    </p>
+                  </div>
+                </section>
               </div>
             </motion.div>
           )}
@@ -498,48 +564,7 @@ function HomeContent() {
         )}
       </AnimatePresence>
 
-      <footer className="border-t border-zinc-900 py-12 px-4 md:px-12 text-zinc-500 text-sm bg-zinc-950">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          <div className="space-y-4">
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs">CineStream</h4>
-            <p className="text-xs leading-relaxed text-zinc-400">Browse movies and TV shows, read reviews, and stream our library of public domain films.</p>
-          </div>
-          <div className="space-y-2 flex flex-col">
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Navigation</h4>
-            <button onClick={() => setActiveTab('home')} className="text-left text-xs hover:text-white transition-colors">Home</button>
-            <button onClick={() => setActiveTab('movies')} className="text-left text-xs hover:text-white transition-colors">Movies Catalog</button>
-            <button onClick={() => setActiveTab('tv')} className="text-left text-xs hover:text-white transition-colors">TV Shows</button>
-            <button onClick={() => setActiveTab('trending')} className="text-left text-xs hover:text-white transition-colors">Trending Now</button>
-            <Link to="/blog" className="text-left text-xs hover:text-white transition-colors">Blog</Link>
-          </div>
-          <div className="space-y-2 flex flex-col">
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Support</h4>
-            <a href="/contact.html" className="text-left text-xs hover:text-white transition-colors">Contact Us</a>
-            <a href="/about.html" className="text-left text-xs hover:text-white transition-colors">About Us</a>
-            <a href="/terms.html" className="text-left text-xs hover:text-white transition-colors">Terms of Service</a>
-            <a href="/privacy.html" className="text-left text-xs hover:text-white transition-colors">Privacy Policy</a>
-          </div>
-          <div className="space-y-4">
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs">Newsletter</h4>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Email address"
-                className="bg-zinc-900 border border-zinc-800 text-xs rounded px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-red-600 text-white"
-              />
-              <button className="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-red-700 transition-colors">Join</button>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-zinc-900/60 text-xs">
-          <p>(c) 2026 CineStream Inc. All rights reserved.</p>
-          <div className="flex gap-6">
-            <button className="hover:text-white transition-colors">Twitter</button>
-            <button className="hover:text-white transition-colors">Instagram</button>
-            <button className="hover:text-white transition-colors">YouTube</button>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter onNavigate={setActiveTab} />
     </div>
   );
 }
@@ -547,9 +572,10 @@ function HomeContent() {
 function CineStreamApp() {
   return (
     <Routes>
+      <Route path="/" element={<HomeContent />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
-      <Route path="/*" element={<HomeContent />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

@@ -1,13 +1,24 @@
-﻿export interface BlogPost {
+import { libraryPosts } from './blogPostsLibrary';
+
+export interface BlogPost {
   slug: string;
   title: string;
+  /** Short summary used for meta descriptions and blog index cards. */
+  description: string;
+  /** ISO date (YYYY-MM-DD) used for sorting and article structured data. */
+  date: string;
+  /** Topic label shown on the index; also groups related reading. */
+  category: string;
   body: string;
 }
 
-export const posts: BlogPost[] = [
+const sitePosts: BlogPost[] = [
   {
     slug: 'how-we-pick-trending',
     title: "How We Pick What's Trending",
+    description: 'How the CineStream trending row is ranked: recent release buzz, rating momentum, and a genre balance cap that stops one category taking over.',
+    date: '2026-07-24',
+    category: 'Behind the Scenes',
     body: `Our trending list isn't random, and it isn't just "whatever is popular this week" copied from a single external chart. We weigh a mix of signals every day: how much recent release buzz a title has, whether its audience rating is climbing or falling, and how well the overall list balances across genres so one category doesn't quietly take over the whole row.
 
 Recent buzz matters most in the first few days after a release, since that's when word of mouth is loudest and most people are deciding whether something is worth their time. But buzz fades fast, so we don't let it dominate the ranking forever. A film that opened big but is getting lukewarm reviews a week later will start sliding down the list, even if it was the top result a few days earlier.
@@ -23,6 +34,9 @@ The result is a list that reshuffles daily but isn't chaotic — it's meant to f
   {
     slug: 'guide-using-cinestream',
     title: 'A Quick Guide to Using CineStream',
+    description: 'A practical walkthrough of the CineStream homepage, detail pages, search filters, My List, and Continue Watching.',
+    date: '2026-07-25',
+    category: 'Guides',
     body: `If you're new to CineStream, here's a practical walkthrough of how the site is laid out and how to get the most out of it without hunting around.
 
 Start on the homepage, where content is organized by mood and genre rather than dumped into one long undifferentiated list. You'll see rows like Trending Now, Popular Movies, Latest Releases, and genre-specific rows such as Action Thrillers and Powerful Dramas. Scrolling horizontally within a row lets you browse that category without losing your place on the page.
@@ -40,6 +54,9 @@ Related titles appear at the bottom of every detail page, which is a good way to
   {
     slug: 'why-ratings-matter',
     title: 'Why We Show Ratings the Way We Do',
+    description: 'Why we show written reviews and sample size alongside the score, instead of presenting a single average as the whole story.',
+    date: '2026-07-26',
+    category: 'Behind the Scenes',
     body: `A single number can hide a lot, and that's the main reason we've never been comfortable showing just a star rating and calling it a day. Two films can both sit at 7.5 out of 10 and mean completely different things — one might be consistently good but unremarkable, while the other might be polarizing, loved intensely by half its audience and disliked by the rest. The average looks the same either way, but the experience of watching them is not.
 
 That's why, alongside the overall score, we surface real written reviews so you can see the reasoning behind the number rather than just the number itself. Reading even two or three reviews usually tells you more than staring at a rating for a minute, because you start to notice patterns — maybe reviewers keep mentioning a slow first act, or praising a particular performance, or warning about pacing issues in the back half. That kind of detail is exactly what a single aggregate score can't communicate.
@@ -53,6 +70,9 @@ None of this is meant to replace your own judgment — it's meant to give you en
   {
     slug: 'public-domain-films-worth-watching',
     title: 'The Public Domain Library Hiding in Plain Sight',
+    description: 'What is actually in our public domain library: silent classics, mid-century noir, early science fiction, and archival documentaries.',
+    date: '2026-07-27',
+    category: 'Public Domain',
     body: `Every title on CineStream marked as fully playable comes from a growing library of public domain films — movies whose copyright has expired, was never renewed, or was otherwise released into the public domain by the rights holder. A lot of people hear "public domain" and immediately picture only grainy black-and-white shorts from the very early days of cinema, but the reality is a lot wider and more interesting than that.
 
 Silent-era classics make up a meaningful chunk of the catalog, and many of them hold up remarkably well once you adjust to the format — visual storytelling was pushed to do a lot of heavy lifting when dialogue wasn't an option, and some of the camera work and staging from that era still feels inventive today. Mid-century film noir is another surprisingly large category; a number of B-movie thrillers and crime dramas from the 1940s and 50s fell into the public domain due to studios failing to renew copyright registrations, a fairly common clerical oversight at the time.
@@ -66,6 +86,9 @@ If a public domain match doesn't exist yet for a given title, we say so rather t
   {
     slug: 'how-recommendations-work',
     title: 'How Our Genre Rows Actually Get Built',
+    description: 'Genre rows are rebuilt continuously from rating thresholds and recency rather than hand-picked once and left alone.',
+    date: '2026-07-28',
+    category: 'Behind the Scenes',
     body: `The genre rows on your homepage aren't hand-picked once by someone on our team and then left alone for months — they're built dynamically from a live catalog and refreshed continuously based on a mix of rating thresholds and recency, which means the specific titles you see in, say, the Action row today may not be the same ones you'd see in it a month from now.
 
 Here's roughly how it works under the hood. Every title in the catalog carries genre tags, a rating, and a release or add date. For a title to qualify for a genre row, it needs to clear a minimum rating threshold — this keeps weak, poorly-reviewed titles from cluttering a row just because they technically belong to that genre. Titles that clear the threshold are then weighted partly by recency, so newer additions get a bit of a visibility boost relative to older catalog entries, but older titles don't get pushed out entirely — a well-reviewed film from several years ago can still hold its position if it continues to perform well.
@@ -79,6 +102,9 @@ We also intentionally avoid making genre rows purely a popularity contest, since
   {
     slug: 'building-continue-watching',
     title: 'Why Continue Watching Remembers More Than You Think',
+    description: 'How watch progress is stored, why the row is capped at twenty titles, and why it is tied to your account rather than your device.',
+    date: '2026-07-29',
+    category: 'Behind the Scenes',
     body: `When you're signed in, CineStream keeps a running history of what you've watched and exactly where you left off, down to a fairly precise timestamp rather than just a rough "started" or "finished" flag. That level of detail is what powers the Continue Watching row on your homepage, which is sorted by most recently watched first and capped at your last twenty titles so it doesn't get cluttered with things you watched months ago and have no intention of returning to.
 
 The reason we cap it at twenty rather than showing your entire watch history is mostly about usefulness. A Continue Watching row with two hundred entries stops being a quick way to pick up where you left off and starts being just another long list to scroll through — which defeats the point. Twenty recent entries tends to strike a reasonable balance between covering things you might genuinely come back to and staying short enough to scan at a glance.
@@ -92,6 +118,9 @@ It's also worth noting that Continue Watching only tracks titles you've actually
   {
     slug: 'my-list-vs-history',
     title: "My List vs. History: What's the Difference?",
+    description: 'My List records intent and History records behaviour. Here is how the two features differ and why they are kept separate.',
+    date: '2026-07-30',
+    category: 'Guides',
     body: `It's easy to mix these two features up at first glance, since they both surface titles related to your account, but they're built around fundamentally different kinds of intent and work quite differently under the hood.
 
 My List is entirely intentional. Nothing lands there unless you manually tap "Add to List" on a title's detail page — it's a shelf you're actively curating, not something that fills up automatically as you browse. Because it's manual, My List tends to reflect what you're planning to watch rather than what you've already seen. A title can sit in My List for weeks or months without you ever having pressed play on it, and that's completely normal — it's meant to function as a saved-for-later queue, not a record of activity.
@@ -107,6 +136,9 @@ If you ever want to remove something from My List, you can do so from the same d
   {
     slug: 'search-filters-explained',
     title: 'Getting the Most Out of Search Filters',
+    description: 'Genre, minimum rating, and year range stack together rather than overriding each other. How to use that for real discovery.',
+    date: '2026-07-31',
+    category: 'Guides',
     body: `Typing a title directly into search is the fastest path when you already know what you're looking for, but the filter panel sitting next to it does considerably more work than most people realize, especially if you're browsing without a specific title in mind.
 
 The filter panel lets you stack genre, minimum rating, and release year range together, and — importantly — the results update against all of those criteria simultaneously rather than just applying whichever filter you touched most recently. That distinction matters more than it sounds. A lot of filter systems on other sites apply filters one at a time in a way that effectively resets earlier choices; ours combines them, so setting a genre and a minimum rating and a year range all at once actually narrows results down to the intersection of all three, not just the last one you adjusted.
@@ -122,6 +154,9 @@ One thing worth knowing: filters apply to the currently active tab, so a filter 
   {
     slug: 'about-our-video-sources',
     title: 'A Note on Where Our Video Comes From',
+    description: 'Where every video on CineStream comes from: YouTube for trailers, a verified public domain archive for full films, and nothing else.',
+    date: '2026-08-01',
+    category: 'Policy',
     body: `Transparency matters to us here more than in most areas of the site, mostly because streaming platforms in general have earned a fairly poor reputation for being vague or dishonest about where their video content actually comes from. So here's the straightforward version, without hedging.
 
 Trailers across CineStream are served directly through YouTube's official embed player. We don't host trailer files ourselves or route them through any third-party mirror — when you watch a trailer on a detail page, you're watching it through YouTube's own infrastructure, embedded on our page but playing directly from their servers under their standard embed terms.
@@ -133,3 +168,16 @@ We want to be explicit about what this means in practice: we don't host pirated 
 We know this means our fully-playable catalog is smaller than sites that don't observe this boundary. That's a tradeoff we've made deliberately rather than by accident, and it's one we'd rather be upfront about than have someone discover the hard way.`
   }
 ];
+
+export const posts: BlogPost[] = [...sitePosts, ...libraryPosts].sort(
+  (a, b) => b.date.localeCompare(a.date)
+);
+
+export function getPost(slug: string | undefined): BlogPost | undefined {
+  return posts.find((p) => p.slug === slug);
+}
+
+/** Rough reading time in minutes, used on the blog index and article header. */
+export function readingTime(post: BlogPost): number {
+  return Math.max(1, Math.round(post.body.split(/\s+/).length / 220));
+}
