@@ -1,6 +1,10 @@
-﻿import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT_ID || '';
+// Falls back to the build-time constant so the unit always renders with a
+// valid publisher ID, matching the snippet in index.html and /ads.txt.
+const ADSENSE_CLIENT =
+  import.meta.env.VITE_ADSENSE_CLIENT_ID ||
+  (typeof __ADSENSE_CLIENT_ID__ !== 'undefined' ? __ADSENSE_CLIENT_ID__ : '');
 
 interface AdSlotProps {
   slot: string;
@@ -25,7 +29,10 @@ export const AdSlot: React.FC<AdSlotProps> = ({ slot, format = 'auto', className
   if (!ADSENSE_CLIENT) return null;
 
   return (
-    <div className={`w-full flex justify-center my-6 ${className}`}>
+    <div className={`w-full flex flex-col items-center my-6 ${className}`}>
+      {/* AdSense requires paid placements to be clearly distinguishable from
+          site content. "Advertisement" is one of the two labels Google allows. */}
+      <span className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1">Advertisement</span>
       <ins
         ref={adRef}
         className="adsbygoogle"

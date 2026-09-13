@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, User, Menu, X, Home, Film, Tv, TrendingUp, List, SlidersHorizontal, Sun, Moon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, User, Menu, X, Home, Film, Tv, TrendingUp, List, SlidersHorizontal, Sun, Moon, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useTheme } from '../context/ThemeContext';
@@ -84,6 +85,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               {item.label}
             </button>
           ))}
+          <Link
+            to="/blog"
+            className="text-sm font-medium text-gray-300 transition-colors hover:text-red-500 min-h-[40px] px-1 flex items-center"
+          >
+            Blog
+          </Link>
         </div>
       </div>
 
@@ -141,13 +148,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-400" />}
         </button>
 
-        <button 
-          aria-label="Notifications"
-          className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-300 hover:text-white transition-colors rounded-full hover:bg-zinc-800/60"
-        >
-          <Bell className="w-4 h-4" />
-        </button>
-
         {/* User Profile Menu */}
         <div className="relative group">
           <button 
@@ -161,12 +161,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           <div className="absolute right-0 top-full mt-2 w-52 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all py-2 z-50">
             <div className="px-4 py-2 border-b border-zinc-800">
-              <p className="text-xs font-bold text-white">CineStream User</p>
-              <p className="text-[10px] text-gray-400">Premium Subscriber</p>
+              <p className="text-xs font-bold text-white">CineStream</p>
+              <p className="text-[10px] text-gray-400">Sign in from any title to save your list</p>
             </div>
-            
-            <button 
-              onClick={toggleTheme} 
+
+            <button
+              onClick={toggleTheme}
               className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-zinc-800 hover:text-white flex items-center justify-between"
             >
               <span>Theme</span>
@@ -174,10 +174,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {theme}
               </span>
             </button>
-            <button className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-zinc-800 hover:text-white">Profile</button>
-            <button className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-zinc-800 hover:text-white">Settings</button>
+            <Link to="/blog" className="block px-4 py-2.5 text-xs text-gray-300 hover:bg-zinc-800 hover:text-white">Blog and Guides</Link>
+            <a href="/about.html" className="block px-4 py-2.5 text-xs text-gray-300 hover:bg-zinc-800 hover:text-white">About Us</a>
+            <a href="/contact.html" className="block px-4 py-2.5 text-xs text-gray-300 hover:bg-zinc-800 hover:text-white">Contact Us</a>
             <div className="h-px bg-zinc-800 my-1" />
-            <button className="w-full text-left px-4 py-2.5 text-xs text-red-500 font-bold hover:bg-zinc-800">Sign Out</button>
+            <a href="/privacy.html" className="block px-4 py-2.5 text-xs text-gray-400 hover:bg-zinc-800 hover:text-white">Privacy Policy</a>
+            <a href="/terms.html" className="block px-4 py-2.5 text-xs text-gray-400 hover:bg-zinc-800 hover:text-white">Terms of Service</a>
           </div>
         </div>
 
@@ -229,6 +231,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               ))}
 
+              <Link
+                to="/blog"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 text-base font-semibold py-2.5 px-3 rounded-lg min-h-[44px] text-gray-300 hover:bg-zinc-900 transition-colors"
+              >
+                <BookOpen className="w-5 h-5" />
+                Blog and Guides
+              </Link>
+
               <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between">
                 <span className="text-xs text-gray-400 font-medium">Appearance</span>
                 <button
@@ -238,6 +249,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-400" />}
                   <span className="capitalize">{theme} Mode</span>
                 </button>
+              </div>
+
+              <div className="pt-3 border-t border-zinc-800/80 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-gray-500">
+                <a href="/about.html" className="hover:text-white">About</a>
+                <a href="/contact.html" className="hover:text-white">Contact</a>
+                <a href="/faq.html" className="hover:text-white">FAQ</a>
+                <a href="/privacy.html" className="hover:text-white">Privacy</a>
+                <a href="/terms.html" className="hover:text-white">Terms</a>
+                <a href="/disclaimer.html" className="hover:text-white">Disclaimer</a>
               </div>
             </div>
           </motion.div>

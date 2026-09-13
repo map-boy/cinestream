@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# Ad crawlers need access to serve relevant ads.
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
 Sitemap: https://cinestream-1.vercel.app/sitemap.xml

@@ -1,4 +1,4 @@
-﻿export interface WikiSummary {
+export interface WikiSummary {
   extract: string;
   extractHtml: string;
   pageUrl: string;

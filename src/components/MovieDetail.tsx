@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Plus, X, Star, Clock, Calendar, Tag, ExternalLink, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Movie } from '../types';
