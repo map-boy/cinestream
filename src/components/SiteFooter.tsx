@@ -1,19 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { TAB_META } from '../lib/catalogueTabs';
 
-interface SiteFooterProps {
-  /** Supplied on the home page so catalogue links switch tabs in place. */
-  onNavigate?: (tab: string) => void;
-}
-
-const CATALOGUE_TABS: { id: string; label: string }[] = [
-  { id: 'home', label: 'Home' },
-  { id: 'movies', label: 'Movies Catalog' },
-  { id: 'tv', label: 'TV Shows' },
-  { id: 'trending', label: 'Trending Now' },
+const CATALOGUE_LINKS = [
+  { path: TAB_META.home.path, label: 'Home' },
+  { path: TAB_META.movies.path, label: 'Movies Catalogue' },
+  { path: TAB_META.tv.path, label: 'TV Shows' },
+  { path: TAB_META.trending.path, label: 'Trending Now' },
+  { path: TAB_META.mylist.path, label: 'My List' },
 ];
 
-export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
+export const SiteFooter: React.FC = () => {
   const linkClass = 'text-left text-xs hover:text-white transition-colors';
 
   return (
@@ -32,17 +29,11 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
 
         <nav className="space-y-2 flex flex-col" aria-label="Catalogue">
           <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-2">Browse</h4>
-          {CATALOGUE_TABS.map((tab) =>
-            onNavigate ? (
-              <button key={tab.id} onClick={() => onNavigate(tab.id)} className={linkClass}>
-                {tab.label}
-              </button>
-            ) : (
-              <Link key={tab.id} to="/" className={linkClass}>
-                {tab.label}
-              </Link>
-            )
-          )}
+          {CATALOGUE_LINKS.map((item) => (
+            <Link key={item.path} to={item.path} className={linkClass}>
+              {item.label}
+            </Link>
+          ))}
           <Link to="/blog" className={linkClass}>Blog and Guides</Link>
         </nav>
 

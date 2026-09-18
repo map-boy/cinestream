@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Plus, X, Star, Clock, Calendar, Tag, ExternalLink, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Movie } from '../types';
+import { availabilityLabel, isFullFilm, playLabel } from '../lib/availability';
 import { MovieRow } from './MovieRow';
 import { movieService, MovieReview, CastMember } from '../services/movieService';
 import { getWikipediaSummary, WikiSummary } from '../data/wikipediaService';
@@ -27,10 +28,29 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
   const [reviews, setReviews] = useState<MovieReview[]>([]);
   const [cast, setCast] = useState<CastMember[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
+  /** Set once the Internet Archive has been checked for this title. */
+  const [verified, setVerified] = useState<Movie | null>(null);
 
   useEffect(() => {
     if (!movie) return;
     let cancelled = false;
+    setVerified(null);
+
+    // Catalogue listings are not archive-checked (one lookup per title would be
+    // far too many requests), so the check happens when a title is opened. Until
+    // it returns, the title is presented as trailer-only, which is the safe
+    // default: we never imply a full film we have not verified.
+    if (!movie.isPlayableFull) {
+      movieService
+        .attachPublicDomainFlags([movie])
+        .then(([checked]) => {
+          if (!cancelled && checked.isPlayableFull) setVerified(checked);
+        })
+        .catch(() => {
+          /* archive unreachable: stays trailer-only */
+        });
+    }
+
     setContentLoading(true);
     setWikiSummary(null);
     setReviews([]);
@@ -54,6 +74,8 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
   }, [movie?.id]);
 
   if (!movie) return null;
+
+  const playable = verified || movie;
 
   return (
     <motion.div
@@ -83,17 +105,27 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
 
           <div className="absolute bottom-6 md:bottom-12 left-4 md:left-16 right-4 max-w-2xl">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-4 sm:mb-6 tracking-tighter">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-3 sm:mb-4 tracking-tighter">
               {movie.title}
             </h2>
 
+            <span
+              className={
+                isFullFilm(playable)
+                  ? 'inline-block mb-4 sm:mb-6 bg-emerald-600/20 text-emerald-300 border border-emerald-600/40 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider'
+                  : 'inline-block mb-4 sm:mb-6 bg-zinc-700/40 text-zinc-300 border border-zinc-600/50 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider'
+              }
+            >
+              {availabilityLabel(playable)}
+            </span>
+
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-2">
               <button
-                onClick={() => onPlay(movie)}
+                onClick={() => onPlay(playable)}
                 className="flex items-center justify-center gap-2 bg-white text-black min-h-[44px] px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold text-sm sm:text-base hover:bg-white/90 transition-transform active:scale-95 shadow-lg"
               >
                 <Play className="w-5 h-5 fill-current" />
-                Play Now
+                {playLabel(playable)}
               </button>
               <button
                 onClick={() => onAddToList(movie)}
@@ -103,6 +135,12 @@ export const MovieDetail: React.FC<MovieDetailProps> = ({
                 Add to List
               </button>
             </div>
+
+            <p className="text-xs sm:text-sm text-zinc-300 mt-3 max-w-xl">
+              {isFullFilm(playable)
+                ? 'This title is in the public domain, so the complete film plays here, streamed from the Internet Archive.'
+                : 'This title is still under copyright, so CineStream shows the trailer, synopsis, cast and reviews only. To watch it in full, use a service licensed to distribute it.'}
+            </p>
           </div>
         </div>
 

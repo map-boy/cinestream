@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Movie } from '../types';
+import { availabilityLabel, isFullFilm, playLabel } from '../lib/availability';
 
 interface HeroProps {
   movies: Movie[];
@@ -59,12 +60,21 @@ export const Hero: React.FC<HeroProps> = ({ movies, onPlay, onInfo }) => {
             <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
               Featured
             </span>
+            <span
+              className={
+                isFullFilm(movie)
+                  ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-600/40 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider'
+                  : 'bg-zinc-700/40 text-zinc-300 border border-zinc-600/50 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider'
+              }
+            >
+              {availabilityLabel(movie)}
+            </span>
             <span className="text-gray-300 text-xs md:text-sm font-medium">
               {movie.year} • {movie.duration} • {movie.genre.join(', ')}
             </span>
           </div>
           
-          <h1 className="sr-only">CineStream - Watch Movies and TV Shows Online</h1>
+          <h1 className="sr-only">CineStream - Discover films and television, and watch public domain cinema in full</h1>
           <h2 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-3 md:mb-4 leading-tight tracking-tight">
             {movie.title}
           </h2>
@@ -79,7 +89,7 @@ export const Hero: React.FC<HeroProps> = ({ movies, onPlay, onInfo }) => {
               className="flex items-center justify-center gap-2 bg-white text-black min-h-[44px] px-5 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold text-sm sm:text-base hover:bg-white/90 transition-all transform active:scale-95 shadow-lg"
             >
               <Play className="w-5 h-5 fill-current" />
-              Play Now
+              {playLabel(movie)}
             </button>
             <button
               onClick={() => onInfo(movie)}

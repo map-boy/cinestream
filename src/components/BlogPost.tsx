@@ -95,12 +95,12 @@ export const BlogPost: React.FC = () => {
           {paragraphs.map((para, i) => (
             <React.Fragment key={i}>
               <p>{para}</p>
-              {i === 3 && paragraphs.length > 7 && <AdSlot slot="4444444444" />}
+              {i === 3 && paragraphs.length > 7 && <AdSlot placement="article-inline" />}
             </React.Fragment>
           ))}
         </div>
 
-        <AdSlot slot="5555555555" className="mt-10" />
+        <AdSlot placement="article-end" className="mt-10" />
 
         {related.length > 0 && (
           <section className="mt-12 pt-8 border-t border-zinc-800">

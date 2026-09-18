@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_TMDB_API_KEY?: string;
   readonly VITE_ADSENSE_CLIENT_ID?: string;
+  readonly VITE_AD_SLOTS?: string;
 }
 
 interface ImportMeta {

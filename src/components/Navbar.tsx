@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, User, Menu, X, Home, Film, Tv, TrendingUp, List, SlidersHorizontal, Sun, Moon, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { pathForTab } from '../lib/catalogueTabs';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useTheme } from '../context/ThemeContext';
@@ -8,7 +9,6 @@ import { useTheme } from '../context/ThemeContext';
 interface NavbarProps {
   onSearch: (query: string) => void;
   activeTab: string;
-  setActiveTab: (tab: string) => void;
   onToggleFilters?: () => void;
   isFilterOpen?: boolean;
   hasActiveFilters?: boolean;
@@ -17,8 +17,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onSearch, 
-  activeTab, 
-  setActiveTab,
+  activeTab,
   onToggleFilters,
   isFilterOpen,
   hasActiveFilters 
@@ -65,25 +64,25 @@ export const Navbar: React.FC<NavbarProps> = ({
       )}
     >
       <div className="flex items-center gap-6 md:gap-8">
-        <div 
-          className="text-red-600 text-2xl md:text-3xl font-black tracking-tighter cursor-pointer flex items-center gap-1 select-none hover:opacity-90 transition-opacity"
-          onClick={() => setActiveTab('home')}
+        <Link
+          to="/"
+          className="text-red-600 text-2xl md:text-3xl font-black tracking-tighter flex items-center gap-1 select-none hover:opacity-90 transition-opacity"
         >
           CINESTREAM
-        </div>
+        </Link>
         
         <div className="hidden lg:flex items-center gap-6">
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              to={pathForTab(item.id)}
               className={cn(
                 'text-sm font-medium transition-colors hover:text-red-500 min-h-[40px] px-1 flex items-center',
                 activeTab === item.id ? 'text-red-600 font-bold border-b-2 border-red-600' : 'text-gray-300'
               )}
             >
               {item.label}
-            </button>
+            </Link>
           ))}
           <Link
             to="/blog"
@@ -215,12 +214,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               {navItems.map((item) => (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setIsMobileMenuOpen(false);
-                  }}
+                  to={pathForTab(item.id)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     'flex items-center gap-3 text-base font-semibold py-2.5 px-3 rounded-lg min-h-[44px] transition-colors',
                     activeTab === item.id ? 'bg-red-600/10 text-red-600 font-bold' : 'text-gray-300 hover:bg-zinc-900'
@@ -228,7 +225,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <item.icon className="w-5 h-5" />
                   {item.label}
-                </button>
+                </Link>
               ))}
 
               <Link

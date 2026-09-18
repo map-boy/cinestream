@@ -87,24 +87,43 @@ async function fetchPages(
     .map((r) => mapItem(r, type, flags));
 }
 
+/**
+ * Collection results are stable for a session and the catalogue views remount
+ * when the user moves between /movies, /tv-shows and so on. Caching the
+ * in-flight promise keeps a tab switch free instead of refetching every list
+ * from TMDB each time.
+ */
+const collectionCache = new Map<string, Promise<Movie[]>>();
+
+function cached(key: string, load: () => Promise<Movie[]>): Promise<Movie[]> {
+  const hit = collectionCache.get(key);
+  if (hit) return hit;
+  const promise = load().catch((err) => {
+    collectionCache.delete(key); // let a later attempt retry after a failure
+    throw err;
+  });
+  collectionCache.set(key, promise);
+  return promise;
+}
+
 async function getTrending(): Promise<Movie[]> {
-  return fetchPages('/trending/movie/week', 'movie', 1, { isTrending: true });
+  return cached('trending', () => fetchPages('/trending/movie/week', 'movie', 1, { isTrending: true }));
 }
 
 async function getPopular(): Promise<Movie[]> {
-  return fetchPages('/movie/popular', 'movie', 2, { isPopular: true });
+  return cached('popular', () => fetchPages('/movie/popular', 'movie', 2, { isPopular: true }));
 }
 
 async function getLatest(): Promise<Movie[]> {
-  return fetchPages('/movie/now_playing', 'movie', 1, { isLatest: true });
+  return cached('latest', () => fetchPages('/movie/now_playing', 'movie', 1, { isLatest: true }));
 }
 
 async function getMoviesOnly(): Promise<Movie[]> {
-  return fetchPages('/movie/top_rated', 'movie', 3);
+  return cached('movies', () => fetchPages('/movie/top_rated', 'movie', 3));
 }
 
 async function getTvShows(): Promise<Movie[]> {
-  return fetchPages('/tv/popular', 'tv', 3);
+  return cached('tv', () => fetchPages('/tv/popular', 'tv', 3));
 }
 
 async function getAllMovies(): Promise<Movie[]> {
@@ -116,7 +135,31 @@ async function getMoviesByGenre(genreName: string): Promise<Movie[]> {
   await loadGenres();
   const genreId = movieGenreNameToId[genreName];
   if (!genreId) return [];
-  return fetchPages(`/discover/movie?with_genres=${genreId}`, 'movie', 1);
+  return cached(`genre:${genreId}`, () =>
+    fetchPages(`/discover/movie?with_genres=${genreId}`, 'movie', 1)
+  );
+}
+
+/**
+ * Films we can legally stream in full.
+ *
+ * Copyright expiry correlates strongly with age, so the candidate set is early
+ * cinema pulled from TMDB; each candidate is then verified against the Internet
+ * Archive and only the ones with a matching archived copy are marked playable.
+ * The archive check is the gate, not the release year: an old film with no
+ * archived copy stays trailer-only like anything else. If the archive is
+ * unreachable the list comes back empty and the row is simply not shown.
+ */
+async function getPublicDomainFilms(): Promise<Movie[]> {
+  return cached('public-domain', async () => {
+    const candidates = await fetchPages(
+      '/discover/movie?primary_release_date.lte=1929-12-31&sort_by=popularity.desc',
+      'movie',
+      1
+    );
+    const verified = await attachPublicDomainFlags(candidates.slice(0, 20));
+    return verified.filter((m) => m.isPlayableFull);
+  });
 }
 
 async function getAvailableGenres(): Promise<string[]> {
@@ -259,6 +302,7 @@ export const movieService = {
   getPopular,
   getLatest,
   getMoviesByGenre,
+  getPublicDomainFilms,
   getAvailableGenres,
   getAvailableYears,
   searchMovies,

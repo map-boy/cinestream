@@ -94,7 +94,7 @@ export const Blog: React.FC = () => {
                   <p className="text-zinc-400 text-sm leading-relaxed">{p.description}</p>
                 </Link>
               </article>
-              {i === 4 && <AdSlot slot="3333333333" />}
+              {i === 4 && <AdSlot placement="blog-index" />}
             </React.Fragment>
           ))}
         </div>

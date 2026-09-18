@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { Movie } from '../types';
 import { MovieCard } from './MovieCard';
-import { Zap, Layers } from 'lucide-react';
 
 interface VirtualizedMovieGridProps {
   movies: Movie[];
@@ -87,17 +86,17 @@ export const VirtualizedMovieGrid: React.FC<VirtualizedMovieGridProps> = ({
               {movies.length} items
             </span>
           </div>
-
-          <div className="flex items-center gap-1.5 text-xs text-red-500 font-semibold bg-red-950/30 px-3 py-1 rounded-full border border-red-900/50">
-            <Zap className="w-3.5 h-3.5 fill-current" />
-            <span>Virtual Scroll Active ({rowCount} virtual rows)</span>
-          </div>
         </div>
       )}
 
       {movies.length === 0 ? (
-        <div className="py-20 text-center text-zinc-500 text-sm bg-zinc-900/30 rounded-xl border border-zinc-800/60">
-          No items found in this section.
+        <div className="py-20 px-6 text-center text-zinc-400 text-sm bg-zinc-900/30 rounded-xl border border-zinc-800/60">
+          <p className="mb-2">Nothing to show here right now.</p>
+          <p className="text-zinc-500">
+            If you have filters applied, clearing them will bring the full catalogue back. If the
+            catalogue is empty everywhere, our metadata provider is not responding; please try
+            again shortly.
+          </p>
         </div>
       ) : (
         <div

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { MovieRow } from './components/MovieRow';
@@ -21,9 +22,13 @@ import { BlogPost } from './components/BlogPost';
 import { AdSlot } from './components/AdSlot';
 import { SiteFooter } from './components/SiteFooter';
 import { NotFound } from './components/NotFound';
+import { LatestArticles } from './components/LatestArticles';
+import { CATALOGUE_PATHS, TAB_META, tabForPath } from './lib/catalogueTabs';
 
 function HomeContent() {
-  const [activeTab, setActiveTab] = useState('home');
+  const location = useLocation();
+  const activeTab = tabForPath(location.pathname);
+  const tabMeta = TAB_META[activeTab];
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
@@ -43,6 +48,7 @@ function HomeContent() {
   const [latestMovies, setLatestMovies] = useState<Movie[]>([]);
   const [actionMovies, setActionMovies] = useState<Movie[]>([]);
   const [dramaMovies, setDramaMovies] = useState<Movie[]>([]);
+  const [publicDomainFilms, setPublicDomainFilms] = useState<Movie[]>([]);
 
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -106,6 +112,15 @@ function HomeContent() {
     }
 
     loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    // Verified separately and after the catalogue: each candidate costs an
+    // Internet Archive lookup, and the row is optional.
+    movieService
+      .getPublicDomainFilms()
+      .then(setPublicDomainFilms)
+      .catch((err) => console.error('Failed to load public domain films:', err));
   }, []);
 
   useEffect(() => {
@@ -279,7 +294,6 @@ function HomeContent() {
       <div className="min-h-screen bg-zinc-950 text-white">
         <Navbar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
           onSearch={() => {}}
         />
         <main className="pb-20">
@@ -296,9 +310,18 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white selection:bg-red-600 selection:text-white transition-colors duration-300">
+      <Helmet>
+        <title>{tabMeta.title}</title>
+        <meta name="description" content={tabMeta.description} />
+        <link rel="canonical" href={`https://cinestream-1.vercel.app${tabMeta.path}`} />
+        <meta property="og:title" content={tabMeta.title} />
+        <meta property="og:description" content={tabMeta.description} />
+        {/* A personal, sign-in-gated view: nothing here is useful in an index. */}
+        {activeTab === 'mylist' && <meta name="robots" content="noindex, follow" />}
+      </Helmet>
+
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
         onSearch={setSearchQuery}
         onToggleFilters={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
         isFilterOpen={isFilterPanelOpen}
@@ -367,8 +390,23 @@ function HomeContent() {
                     onPlay={setPlayingMovie}
                     onInfo={setSelectedMovie}
                   />
+                  {publicDomainFilms.length > 0 && (
+                    <div>
+                      <MovieRow
+                        title="Watch Free in Full"
+                        movies={publicDomainFilms}
+                        onPlay={setPlayingMovie}
+                        onInfo={setSelectedMovie}
+                      />
+                      <p className="px-4 md:px-12 -mt-6 mb-2 text-xs text-zinc-500 max-w-3xl">
+                        These titles are in the public domain and play here in full, streamed from
+                        the Internet Archive. Every other title on CineStream is trailer and
+                        information only.
+                      </p>
+                    </div>
+                  )}
                   <div className="px-4 md:px-12">
-                    <AdSlot slot="2222222222" />
+                    <AdSlot placement="home-mid" />
                   </div>
                   <MovieRow
                     title="Action Thrillers"
@@ -383,10 +421,12 @@ function HomeContent() {
                     onInfo={setSelectedMovie}
                   />
                   <div className="px-4 md:px-12">
-                    <AdSlot slot="1111111111" />
+                    <AdSlot placement="home-footer" />
                   </div>
                   </>
                 )}
+
+                <LatestArticles />
 
                 <section className="px-4 md:px-12 mt-12">
                   <div className="max-w-3xl space-y-4 text-sm leading-relaxed text-zinc-400">
@@ -435,8 +475,13 @@ function HomeContent() {
               exit={{ opacity: 0 }}
               className="pt-28 px-4 md:px-12 space-y-8"
             >
+              <header className="max-w-3xl">
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-3">Movies Catalogue</h1>
+                <p className="text-sm text-zinc-400 leading-relaxed">{TAB_META['movies'].intro}</p>
+              </header>
+
               <VirtualizedMovieGrid
-                gridTitle="Movies Catalog"
+                gridTitle="All Films"
                 movies={moviesOnly.length > 0 ? moviesOnly : allMovies.filter((m) => m.type !== 'tv')}
                 onPlay={setPlayingMovie}
                 onInfo={setSelectedMovie}
@@ -454,8 +499,13 @@ function HomeContent() {
               exit={{ opacity: 0 }}
               className="pt-28 px-4 md:px-12 space-y-8"
             >
+              <header className="max-w-3xl">
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-3">TV Shows and Series</h1>
+                <p className="text-sm text-zinc-400 leading-relaxed">{TAB_META['tv'].intro}</p>
+              </header>
+
               <VirtualizedMovieGrid
-                gridTitle="TV Shows & Series"
+                gridTitle="All Series"
                 movies={tvShows.length > 0 ? tvShows : allMovies.filter((m) => m.type === 'tv')}
                 onPlay={setPlayingMovie}
                 onInfo={setSelectedMovie}
@@ -473,7 +523,10 @@ function HomeContent() {
               exit={{ opacity: 0 }}
               className="pt-28 px-4 md:px-12 space-y-8"
             >
-              <h2 className="text-3xl font-black uppercase tracking-tighter border-b border-zinc-800 pb-4">Trending Today</h2>
+              <header className="max-w-3xl border-b border-zinc-800 pb-5">
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-3">Trending Today</h1>
+                <p className="text-sm text-zinc-400 leading-relaxed">{TAB_META['trending'].intro}</p>
+              </header>
               <MovieRow title="Top 10 Global" movies={trendingMovies} onPlay={setPlayingMovie} onInfo={setSelectedMovie} />
               <MovieRow title="Most Watched" movies={popularMovies} onPlay={setPlayingMovie} onInfo={setSelectedMovie} />
             </motion.div>
@@ -487,7 +540,10 @@ function HomeContent() {
               exit={{ opacity: 0 }}
               className="pt-28 px-4 md:px-12"
             >
-              <h2 className="text-3xl font-black mb-8 uppercase tracking-tighter border-b border-zinc-800 pb-4">My List</h2>
+              <header className="max-w-3xl border-b border-zinc-800 pb-5 mb-8">
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-3">My List</h1>
+                <p className="text-sm text-zinc-400 leading-relaxed">{TAB_META['mylist'].intro}</p>
+              </header>
               {myListMovies.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                   {myListMovies.map((movie) => (
@@ -503,12 +559,12 @@ function HomeContent() {
               ) : (
                 <div className="py-32 text-center bg-zinc-900/30 rounded-2xl border border-zinc-800/80 p-8">
                   <p className="text-zinc-400 text-lg mb-4">Your list is currently empty.</p>
-                  <button
-                    onClick={() => setActiveTab('home')}
-                    className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition-colors shadow-lg"
+                  <Link
+                    to="/movies"
+                    className="inline-block px-6 py-2.5 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition-colors shadow-lg"
                   >
                     Explore Movies
-                  </button>
+                  </Link>
                 </div>
               )}
             </motion.div>
@@ -564,7 +620,7 @@ function HomeContent() {
         )}
       </AnimatePresence>
 
-      <SiteFooter onNavigate={setActiveTab} />
+      <SiteFooter />
     </div>
   );
 }
@@ -572,7 +628,9 @@ function HomeContent() {
 function CineStreamApp() {
   return (
     <Routes>
-      <Route path="/" element={<HomeContent />} />
+      {CATALOGUE_PATHS.map((path) => (
+        <Route key={path} path={path} element={<HomeContent />} />
+      ))}
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="*" element={<NotFound />} />

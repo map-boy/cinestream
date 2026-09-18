@@ -62,10 +62,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ movie, onClose }) => {
           <iframe
             className="w-full h-full"
             src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0`}
-            title={movie.title}
+            title={`${movie.title} trailer`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
+          <p className="text-center text-zinc-500 text-xs mt-2">
+            Official trailer via YouTube. The full film is not available on CineStream.
+          </p>
         </div>
       ) : (
         <div className="text-white text-center px-6">

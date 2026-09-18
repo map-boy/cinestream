@@ -11,6 +11,8 @@ Built by VAF Ubwenge Tech, Kigali, Rwanda.
 - Detail pages with synopsis, cast, ratings and reviews
 - Trailer playback via YouTube embeds; full films via the Internet Archive for public domain titles only
 - Continue Watching and My List backed by Firebase Auth and Firestore
+- Catalogue views at their own URLs (`/movies`, `/tv-shows`, `/trending`, `/my-list`), each prerendered with its own title, description and intro
+- Full-film playback limited to titles verified against the Internet Archive, labelled "Full film" wherever they appear; every other title is labelled trailer-only
 - A 25-article blog, prerendered to static HTML at build time for crawlers
 - Static company and legal pages: about, contact, FAQ, privacy, cookies, terms, disclaimer/DMCA
 
@@ -35,6 +37,7 @@ Prerequisites: Node.js 20+.
 | --- | --- | --- |
 | `VITE_TMDB_API_KEY` | Yes | TMDB API key. Without it the catalogue cannot load and the home page shows an explanatory notice instead. Get one free at themoviedb.org under Settings → API. |
 | `VITE_ADSENSE_CLIENT_ID` | No | AdSense publisher ID (`ca-pub-…`). Falls back to the ID hardcoded in `vite.config.ts`, which must match `public/ads.txt`. |
+| `VITE_AD_SLOTS` | No | Manual ad units, as `placement:slotId` pairs (`home-mid`, `home-footer`, `blog-index`, `article-inline`, `article-end`), e.g. `home-mid:1234567890`. Placements with no real slot ID render nothing; the loader script and Auto ads work regardless. |
 | `VITE_INFOLINKS_PUB_ID` | No | Infolinks publisher ID. Left blank, the Infolinks script is stripped from the build entirely. |
 | `VITE_MEDIANET_CID` | No | Media.net customer ID. Left blank, the Media.net script is stripped from the build entirely. |
 

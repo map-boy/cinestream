@@ -3,6 +3,7 @@ import { Play, Plus, Star, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Movie } from '../types';
 import { cn } from '../lib/utils';
+import { isFullFilm, playLabel } from '../lib/availability';
 
 interface MovieCardProps {
   movie: Movie;
@@ -28,6 +29,12 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onPlay, onInfo, onA
         referrerPolicy="no-referrer"
       />
 
+      {isFullFilm(movie) && (
+        <span className="absolute top-2 left-2 z-10 bg-emerald-600/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+          Full film
+        </span>
+      )}
+
       {progress !== undefined && progress > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-zinc-800 z-10">
           <div 
@@ -44,7 +51,8 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onPlay, onInfo, onA
               e.stopPropagation();
               onPlay(movie);
             }}
-            aria-label={`Play ${movie.title}`}
+            aria-label={`${playLabel(movie)}: ${movie.title}`}
+            title={playLabel(movie)}
             className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center bg-white text-black rounded-full hover:bg-white/90 transition-transform active:scale-95"
           >
             <Play className="w-4 h-4 fill-current ml-0.5" />
